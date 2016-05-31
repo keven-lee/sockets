@@ -7,9 +7,22 @@ var io = require('socket.io')(http);
 
 app.use(express.static(__dirname + '/public'));
 
+var clientInfo = {};
 //User connected
 io.on('connection', function(socket) {
        console.log('USer connected to socket.io');
+    
+    socket.on('joinRoom', function(req) {
+       clientInfo[socket.id] = req;
+       socket.join(req.room); 
+       socket.broadcast.to(req.room).emit('message', {
+           name: 'System',
+           text: req.name + ' has joined!',
+           timestamp: moment().valueOf()
+       });
+    });
+    
+    
     //listens to event, once activated console.logs to cmd
     socket.on('message', function(message){
         console.log('Message received ' + message.text);
@@ -18,7 +31,7 @@ io.on('connection', function(socket) {
         message.timestamp = moment().valueOf();
         //sends to eveyone but the person who sent it
         
-        io.emit('message', message);
+        io.to(clientInfo[socket.id].room).emit('message', message);
     });
     //timestamp preoperty - JS in milliseconds
     

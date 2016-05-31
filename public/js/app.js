@@ -3,9 +3,15 @@ var room = getQueryVariable('room');
 var socket = io();
 
 console.log(name + ' wants to join ' + room);
+
+jQuery('.room-title').text(room);
 //in console Connected to socket.io server
 socket.on('connect', function() {
     console.log('Connected to socket.io server');
+    socket.emit('joinRoom', {
+        name: name,
+        room: room
+    });
 });
 // prints New Message
 // then message.text from sender's socket.emit('message', {
